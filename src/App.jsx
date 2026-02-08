@@ -124,7 +124,8 @@ function AppContent() {
     .filter(m => m.renderedComponent)
     .map(m => m.renderedComponent);
 
-  const isProcessing = isSending || streaming;
+  // Fix: preventing button stuck state by relying on local loading state
+  const isProcessing = isSending;
 
   // Track Stats
   useEffect(() => {
@@ -262,9 +263,7 @@ function AppContent() {
               {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-              <LogoIcon size={20} />
-            </div>
+
             <div>
               <h1 style={{ fontSize: '1.25rem', fontWeight: '700', letterSpacing: '-0.025em', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 HealthScribe
@@ -323,7 +322,7 @@ function AppContent() {
                   <div key={i} style={{
                     alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
                     backgroundColor: msg.role === 'user' ? 'var(--accent-primary)' : 'var(--bg-primary)',
-                    color: msg.role === 'user' ? 'white' : 'var(--text-primary)',
+                    color: msg.role === 'user' ? 'var(--btn-text)' : 'var(--text-primary)',
                     padding: '0.75rem',
                     borderRadius: 'var(--radius-md)',
                     maxWidth: '85%',
