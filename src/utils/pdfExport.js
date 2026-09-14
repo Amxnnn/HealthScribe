@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { stripUnit } from './units';
 
 export function generateMedicalPDF(data) {
     const doc = new jsPDF();
@@ -75,12 +76,20 @@ export function generateMedicalPDF(data) {
     if (data.vitals && Object.keys(data.vitals).length > 0) {
         addSectionTitle('Vital Signs');
 
+        // Values reach here from the parser, the model, or a clinician's
+        // correction, so any unit already present is stripped before the
+        // canonical one is appended (otherwise "94%" became "94%%").
+        const reading = (value, unit, glue = ' ') => {
+            const bare = stripUnit(value);
+            return bare ? `${bare}${glue}${unit}` : '-';
+        };
+
         const vitalBody = [
-            ['Blood Pressure', data.vitals.bp || '-', '120/80 mmHg'],
-            ['Heart Rate', data.vitals.heartRate ? `${data.vitals.heartRate} bpm` : '-', '60-100 bpm'],
-            ['Temperature', data.vitals.temp || '-', '97-99°F'],
-            ['Resp. Rate', data.vitals.respRate ? `${data.vitals.respRate} /min` : '-', '12-20 /min'],
-            ['O2 Saturation', data.vitals.o2Sat ? `${data.vitals.o2Sat}%` : '-', '>95%'],
+            ['Blood Pressure', reading(data.vitals.bp, 'mmHg'), '120/80 mmHg'],
+            ['Heart Rate', reading(data.vitals.heartRate, 'bpm'), '60-100 bpm'],
+            ['Temperature', reading(data.vitals.temp, '°F'), '97-99 °F'],
+            ['Resp. Rate', reading(data.vitals.respRate, '/min'), '12-20 /min'],
+            ['O2 Saturation', reading(data.vitals.o2Sat, '%', ''), '> 95%'],
         ].filter(r => r[1] !== '-');
 
         autoTable(doc, {

@@ -3,6 +3,14 @@
  * @param {string} text - The raw doctor's notes.
  * @returns {object} Structured data object.
  */
+/**
+ * Objective line built from vitals when the note has no explicit one.
+ * Exported so the exporter can recognise a derived line and refresh it
+ * after the clinician corrects a reading.
+ */
+export const deriveObjective = (vitals = {}) =>
+    `Vitals: BP ${vitals.bp || 'N/A'}, HR ${vitals.heartRate || 'N/A'}, Temp ${vitals.temp || 'N/A'}`;
+
 export const parseMedicalNotes = (text) => {
     if (!text) return null;
 
@@ -23,7 +31,7 @@ export const parseMedicalNotes = (text) => {
     const nameMatch = text.match(/(?:patient|pt|name is)\s+([a-zA-Z\s]+?)(?:,|\.|versus|\d)/i) || text.match(/^([a-zA-Z\s]+?)(?:,)/);
     if (nameMatch) result.patientInfo.name = nameMatch[1].trim();
 
-    const ageMatch = text.match(/(\d+)\s*(?:yo|y\/o|years old|years)/i);
+    const ageMatch = text.match(/(\d+)[\s-]*(?:y\/o|yo\b|years?[\s-]*old\b|years?\b)/i);
     if (ageMatch) result.patientInfo.age = parseInt(ageMatch[1]);
 
     const genderMatch = text.match(/\b(male|female|man|woman|boy|girl|[MF])\b/i);
@@ -32,7 +40,9 @@ export const parseMedicalNotes = (text) => {
         result.patientInfo.gender = (g === 'm' || g === 'man' || g === 'boy') ? 'male' : 'female';
     }
 
-    const complaintMatch = text.match(/(?:c\/o|complains of|presenting with|came in for)\s+(.+?)(?:\.|$)/i);
+    const complaintMatch = text.match(
+        /(?:chief complaint(?:\s+(?:is|of))?|c\/o|complains of|complaining of|presents with|presenting with|came in for)\s*:?\s+(.+?)(?:\.|$)/i
+    );
     if (complaintMatch) result.patientInfo.complaint = complaintMatch[1].trim();
 
 
@@ -84,7 +94,7 @@ export const parseMedicalNotes = (text) => {
     if (objMatch) result.soap.objective = objMatch[1].trim();
     else if (Object.keys(result.vitals).length > 0) {
         // Auto-construct objective from vitals if not explicit
-        result.soap.objective = `Vitals: BP ${result.vitals.bp || 'N/A'}, HR ${result.vitals.heartRate || 'N/A'}, Temp ${result.vitals.temp || 'N/A'}`;
+        result.soap.objective = deriveObjective(result.vitals);
     }
 
     const assessMatch = text.match(/(?:Assessment|Impression):\s*(.+?)(?:Plan:|$)/is);

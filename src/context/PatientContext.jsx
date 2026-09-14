@@ -1,19 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import { PatientContext } from './contexts.js';
 
-const PatientContext = createContext();
-
-export const PatientProvider = ({ children, data }) => {
-    return (
-        <PatientContext.Provider value={data || {}}>
-            {children}
-        </PatientContext.Provider>
-    );
-};
-
-export const usePatientData = () => {
-    const context = useContext(PatientContext);
-    if (context === undefined) {
-        throw new Error('usePatientData must be used within a PatientProvider');
-    }
-    return context;
-};
+export const PatientProvider = ({ children, data }) => (
+    <PatientContext.Provider value={data || {}}>
+        {children}
+    </PatientContext.Provider>
+);

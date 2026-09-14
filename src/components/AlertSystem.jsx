@@ -1,46 +1,51 @@
-import { AlertTriangle, AlertCircle, Info } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, AlertCircle, Info, X } from 'lucide-react';
+
+const ICONS = {
+    critical: AlertTriangle,
+    warning: AlertCircle,
+    info: Info
+};
+
+const keyOf = (alert) => `${alert.severity}:${alert.title}`;
 
 export default function AlertSystem({ alerts }) {
+    const [dismissed, setDismissed] = useState([]);
+    const [seen, setSeen] = useState(alerts);
+
+    // A fresh set of alerts is a new clinical situation, so previously
+    // dismissed warnings must come back. Adjusting during render is the
+    // documented way to reset state from props without an extra pass.
+    if (alerts !== seen) {
+        setSeen(alerts);
+        setDismissed([]);
+    }
+
     if (!alerts || alerts.length === 0) return null;
 
-    const getAlertStyle = (severity) => {
-        const styles = {
-            critical: { bg: '#fef2f2', border: '#ef4444', text: '#991b1b' },
-            warning: { bg: '#fefce8', border: '#eab308', text: '#854d0e' },
-            info: { bg: '#eff6ff', border: '#3b82f6', text: '#1e40af' }
-        };
-        return styles[severity] || styles.info;
-    };
-
-    const getAlertIcon = (severity) => {
-        if (severity === 'critical') return <AlertTriangle size={16} />;
-        if (severity === 'warning') return <AlertCircle size={16} />;
-        return <Info size={16} />;
-    };
+    const visible = alerts.filter(a => !dismissed.includes(keyOf(a)));
+    if (visible.length === 0) return null;
 
     return (
-        <div className="alerts-container" style={{ margin: '0 1.5rem 1rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem', animation: 'slideIn 0.3s' }}>
-            {alerts.map((alert, index) => {
-                const style = getAlertStyle(alert.severity);
+        <div className="alert-stack" role="alert" aria-live="assertive">
+            {visible.map((alert) => {
+                const severity = ICONS[alert.severity] ? alert.severity : 'info';
+                const Icon = ICONS[severity];
                 return (
-                    <div
-                        key={index}
-                        style={{
-                            backgroundColor: style.bg,
-                            borderLeft: `4px solid ${style.border}`,
-                            color: style.text,
-                            padding: '0.75rem',
-                            borderRadius: '4px',
-                            fontSize: '0.85rem'
-                        }}
-                    >
-                        <div style={{ display: 'flex', alignItems: 'start', gap: '0.5rem' }}>
-                            <div style={{ marginTop: '2px' }}>{getAlertIcon(alert.severity)}</div>
-                            <div>
-                                <p style={{ fontWeight: '600', marginBottom: '0.1rem' }}>{alert.title}</p>
-                                <p>{alert.message}</p>
-                            </div>
+                    <div key={keyOf(alert)} className={`alert alert-${severity}`}>
+                        <Icon size={15} className="alert-icon" aria-hidden="true" />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <p className="alert-title">{alert.title}</p>
+                            <p>{alert.message}</p>
                         </div>
+                        <button
+                            type="button"
+                            className="alert-dismiss"
+                            aria-label={`Dismiss ${alert.title}`}
+                            onClick={() => setDismissed(prev => [...prev, keyOf(alert)])}
+                        >
+                            <X size={14} />
+                        </button>
                     </div>
                 );
             })}

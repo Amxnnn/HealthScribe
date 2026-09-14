@@ -1,40 +1,40 @@
-import React from 'react';
-import { User, Calendar, Activity, AlertCircle } from 'lucide-react';
+import { User, AlertCircle } from 'lucide-react';
 
 const PatientCard = ({ name, age, gender, complaint }) => {
+    const meta = [
+        age ? `${age} years` : 'Age not recorded',
+        gender || 'Gender not recorded'
+    ];
+
     return (
-        <div className="card" style={{ animation: 'slideIn 0.3s ease' }}>
+        <div className="card">
             <div className="section-title">
-                <User size={20} className="text-secondary" />
+                <User size={17} className="icon-muted" aria-hidden="true" />
                 <span>Patient Information</span>
             </div>
 
-            <div className="patient-info">
-                <div className="info-header" style={{ marginBottom: '1rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                        {name || "Unknown Patient"}
-                    </h2>
-                    <div style={{ display: 'flex', gap: '1rem', color: 'var(--text-secondary)', fontSize: '0.95rem', marginTop: '0.25rem' }}>
-                        <span>{age ? `${age} years` : "Age not recorded"}</span>
-                        <span>•</span>
-                        <span style={{ textTransform: 'capitalize' }}>{gender || "Gender not recorded"}</span>
-                    </div>
-                </div>
+            <h2 style={{ fontSize: '1.375rem', fontWeight: 650, letterSpacing: '-0.022em', color: 'var(--text-primary)' }}>
+                {name || 'Unknown patient'}
+            </h2>
+            <div style={{ display: 'flex', gap: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.8125rem', marginTop: '0.1875rem', marginBottom: '1.125rem' }}>
+                <span>{meta[0]}</span>
+                <span aria-hidden="true" style={{ color: 'var(--text-muted)' }}>•</span>
+                <span style={{ textTransform: 'capitalize' }}>{meta[1]}</span>
+            </div>
 
-                <div style={{
-                    backgroundColor: 'var(--bg-tertiary)',
-                    padding: '1rem',
-                    borderRadius: 'var(--radius-md)',
-                    borderLeft: '4px solid var(--accent-primary)'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        <AlertCircle size={14} />
-                        CHIEF COMPLAINT
-                    </div>
-                    <p style={{ color: 'var(--text-primary)', fontWeight: '500' }}>
-                        {complaint || "No chief complaint recorded."}
-                    </p>
+            <div style={{
+                backgroundColor: 'var(--bg-tertiary)',
+                padding: '0.875rem 1rem',
+                borderRadius: 'var(--radius-md)',
+                border: '1px solid var(--border-light)'
+            }}>
+                <div className="field-label">
+                    <AlertCircle size={13} className="icon-muted" aria-hidden="true" />
+                    Chief complaint
                 </div>
+                <p style={{ color: 'var(--text-primary)', fontSize: '0.9375rem', lineHeight: 1.55 }}>
+                    {complaint || 'No chief complaint recorded.'}
+                </p>
             </div>
         </div>
     );
